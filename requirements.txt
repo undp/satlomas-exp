@@ -1,0 +1,16 @@
+fiona
+hyperopt
+ipdb
+ipython
+jupyter
+keras
+matplotlib
+pandas
+pytest-cov==2.8.1
+pytest==5.3.2
+rasterio
+scikit-learn
+seaborn
+sentinelsat
+shapely
+tensorflow
