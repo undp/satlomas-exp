@@ -9,8 +9,12 @@ import logging
 import sys
 
 from satlomasproc import __version__
-from satlomasproc.chips import extract_chips, prepare_label_shapes, prepare_aoi_shape
-from satlomasproc.utils import get_raster_band_count
+from satlomasproc.chips import (
+    extract_chips,
+    prepare_label_shapes,
+    prepare_aoi_shape,
+)
+from satlomasproc.chips.utils import get_raster_band_count
 from tqdm import tqdm
 
 __author__ = "Damián Silvani"
