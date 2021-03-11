@@ -56,3 +56,5 @@ results/
 *.aux.xml
 .DS_Store
 *.swp
+
+.vscode/
