@@ -4,8 +4,8 @@ import pytest
 from satlomas.data import *
 
 __author__ = "Leandro Abraham"
-__copyright__ = "Leandro Abraham"
-__license__ = "mit"
+__copyright__ = "Dymaxion Labs"
+__license__ = "apache-2.0"
 
 # #TODO: change this
 # def test_read_time_series_from_csv():

@@ -7,8 +7,8 @@ from satlomas.configuration import (
 	)
 
 __author__ = "Leandro Abraham"
-__copyright__ = "Leandro Abraham"
-__license__ = "mit"
+__copyright__ = "Dymaxion Labs"
+__license__ = "apache-2.0"
 
 
 # Mock and test constants

@@ -4,8 +4,8 @@ import pytest
 from satlomas.skeleton import fib
 
 __author__ = "Damián Silvani"
-__copyright__ = "Damián Silvani"
-__license__ = "mit"
+__copyright__ = "Dymaxion Labs"
+__license__ = "apache-2.0"
 
 
 # def test_fib():

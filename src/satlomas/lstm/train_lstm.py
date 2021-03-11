@@ -32,8 +32,8 @@ from satlomas.model import (
 from sklearn.metrics import mean_absolute_error,r2_score
 
 __author__ = "Leandro Abraham"
-__copyright__ = "Leandro Abraham"
-__license__ = "mit"
+__copyright__ = "Dymaxion Labs"
+__license__ = "apache-2.0"
 
 _logger = logging.getLogger(__name__)
 

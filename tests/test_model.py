@@ -8,8 +8,8 @@ from satlomas.configuration import LSTMTrainingScriptConfig
 from keras.models import load_model
 
 __author__ = "Leandro Abraham"
-__copyright__ = "Leandro Abraham"
-__license__ = "mit"
+__copyright__ = "Dymaxion Labs"
+__license__ = "apache-2.0"
 
 
 # to run this test python -m pytest tests/test_model.py
