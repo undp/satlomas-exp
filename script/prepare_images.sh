@@ -1,7 +1,7 @@
 #!/bin/bash
 set -xeu -o pipefail
 
-root_dir=~/geolomas-exp
+root_dir=~/satlomas-exp
 images_dir=$root_dir/data/images
 full_dir=$images_dir/full
 

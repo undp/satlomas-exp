@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 import glob
-from geolomasexp.model import *
-from geolomasexp.configuration import LSTMTrainingScriptConfig
+from satlomas.model import *
+from satlomas.configuration import LSTMTrainingScriptConfig
 from keras.models import load_model
 
 __author__ = "Leandro Abraham"

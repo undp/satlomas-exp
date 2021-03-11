@@ -8,7 +8,7 @@ import pickle
 import sys
 
 
-from geolomasexp import __version__
+from satlomas import __version__
 from sklearn.preprocessing import MinMaxScaler
 
 __author__ = "Leandro Abraham"

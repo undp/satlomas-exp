@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from geolomas.data import *
+from satlomas.data import *
 
 __author__ = "Leandro Abraham"
 __copyright__ = "Leandro Abraham"

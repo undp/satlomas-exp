@@ -69,8 +69,8 @@ function post_process_result {
 function predict_set {
   date_ranges=$1
   for date_range in $date_ranges; do
-    dataset_dir=~/geolomas-exp/data/images/full/$date_range
-    results_dir=~/geolomas-exp/data/results/full/$date_range
+    dataset_dir=~/satlomas-exp/data/images/full/$date_range
+    results_dir=~/satlomas-exp/data/results/full/$date_range
 
     if [ ! -f "$results_dir/cover.tif" ]; then
       mkdir -p $results_dir/feats

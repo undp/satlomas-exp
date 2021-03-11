@@ -8,7 +8,7 @@ import pandas as pd
 import sys
 
 
-from geolomasexp import __version__
+from satlomas import __version__
 
 __author__ = "Leandro Abraham"
 __copyright__ = "Leandro Abraham"

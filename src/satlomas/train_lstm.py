@@ -2,7 +2,7 @@
 """
 This is a script to train an LSTM neural network to predict temporal series.
 To run this script :
-python src/geolomas/train_lstm_hyperopt.py config_train_lstm_temp.json -vv
+python src/satlomas/train_lstm.py config_train_lstm_temp.json -vv
 
 """
 
@@ -15,32 +15,21 @@ import pickle
 import sys
 
 from datetime import datetime
-from geolomasexp import __version__
-from geolomasexp.configuration import LSTMHyperoptTrainingScriptConfig
-from geolomasexp.data import read_time_series_from_csv
-from geolomasexp.feature import (
+from satlomas import __version__
+from satlomas.configuration import LSTMTrainingScriptConfig
+from satlomas.data import read_time_series_from_csv
+from satlomas.feature import (
     get_dataset_from_series,
     get_interest_variable
 )
-
-from geolomasexp.model import (
+from satlomas.model import (
     build_lstm_nnet,
     eval_regression_performance,
     fit_model,
     train_val_test_split
 )
-from geolomasexp.model_hyperopt import (
-    get_lstm_nnet_opt
-)
-from hyperopt import (
-    tpe,
-    hp,
-    fmin
-)
-from keras.models import load_model
-from sklearn.metrics import mean_absolute_error,r2_score
 
-from stations.models import Measurement, Place, Station
+from sklearn.metrics import mean_absolute_error,r2_score
 
 __author__ = "Leandro Abraham"
 __copyright__ = "Leandro Abraham"
@@ -78,8 +67,8 @@ def train_lstm(script_config):
     output_models_path = script_config.output_models_path
     output_results_path = script_config.output_results_path
 
-    hyperopt_pars = script_config.hyperopt_pars
-
+    base_config = script_config.base_config
+    mid_layers_config = script_config.mid_layers_config
     model_loss = script_config.model_loss
     optimizer = script_config.optimizer
 
@@ -98,7 +87,7 @@ def train_lstm(script_config):
     _logger.debug("Got supervised dataset of shape {} with columns {}".format(sup_dataset.shape,sup_dataset.columns))
 
     # guardar el objeto scaler
-    with open('{}{}_hyperopt_scaler_{}.pickle'.format(
+    with open('{}{}_scaler_{}.pickle'.format(
         output_models_path,
         str(script_config),
         time_stmp_str), 'wb') as file_pi:
@@ -112,98 +101,22 @@ def train_lstm(script_config):
 
 
     trainset = dataset_splits['trainset']
+    lstm_nnet = build_lstm_nnet(trainset['X'],base_config,mid_layers_config,model_loss,optimizer)
+    _logger.debug("Got LSTM NNet {}".format(lstm_nnet))
 
-    out_model_name = '{}{}_hyperopt_model_{}.hdf5'.format(
+    out_model_name = '{}{}_model_{}.hdf5'.format(
         output_models_path,
         str(script_config),
         time_stmp_str)
 
-    history_out_name = '{}{}_hyperopt_history_{}.pickle'.format(
+    history_out_name = '{}{}_history_{}.pickle'.format(
         output_models_path,
         str(script_config),
         time_stmp_str)
 
-    mults = hyperopt_pars['mults']
-    dropout_rate_range = hyperopt_pars['dropout_rate_range']
-    n_mid_layers = hyperopt_pars['mid_layers']
-
-    _logger.debug("LSTM NNNet hyperpars to optimize on: mults:{}, dropout:{}, n mid layers:{}".format(
-        mults,dropout_rate_range,n_mid_layers))
-
-    tic = time.time()
-    space = hp.choice('nnet_config',[
-        {'dataset_splits': dataset_splits,
-         'mult_1': hp.choice('mult_1',mults),
-         'dropout_rate_1' : hp.uniform('dropout_rate_1',
-                                    dropout_rate_range[0],
-                                    dropout_rate_range[1]),
-         'mult_mid': hp.choice('mult_mid',mults),
-         'dropout_rate_mid' : hp.uniform('dropout_rate_mid',
-                                    dropout_rate_range[0],
-                                    dropout_rate_range[1]),
-         'mult_n': hp.choice('mult_n',mults),
-         'dropout_rate_n' : hp.uniform('dropout_rate_n',
-                                    dropout_rate_range[0],
-                                    dropout_rate_range[1]),
-         'n_mid_layers': hp.choice('n_mid_layers',n_mid_layers),
-         'model_loss' : model_loss,
-         'optimizer' : optimizer,
-         'target_var' : numeric_var,
-         'output_models_path' : output_models_path,
-         'early_stop_patience': early_stop_patience,
-         'epochs' : epochs,
-         'time_stmp_str' : time_stmp_str,
-         'out_model_name' : out_model_name,
-         'history_out_name' : history_out_name
-        }
-        ])
-
-    optimal_pars = fmin(get_lstm_nnet_opt,space,algo=tpe.suggest,max_evals=hyperopt_pars['max_evals'])
-
-    opt_time = time.time() - tic
-    _logger.debug("Hyper parameter optimization for optimal pars {} took {} seconds for {} datapoints".format(
-        optimal_pars,opt_time,trainset['X'].shape[0]))
-
-
-    # guardando hyper parameters
-    with open('{}{}_hyperopt_optimal_pars_{}.pickle'.format(
-        output_models_path,
-        str(script_config),
-        time_stmp_str), 'wb') as file_pi:
-        pickle.dump(optimal_pars, file_pi)
-
-    # read the model from disk ?
-    #lstm_nnet = load_model(out_model_name)
-    #_logger.debug("Got LSTM NNet from disk {}".format(lstm_nnet))
-
-    #no estoy seguro que sea necesario, pero deberiamos construir una red nueva con los parametros elegidos pot hyperopt
-    base_config_opt = {
-        "first_layer":{
-            "mult":int(mults[optimal_pars['mult_1']]),
-            "dropout_rate":float(optimal_pars['dropout_rate_1'])
-            #"dropout_range":[0,1]
-            },
-        "last_layer":{
-            "mult":int(mults[optimal_pars['mult_n']]),
-            "dropout_rate":float(optimal_pars['dropout_rate_n'])
-            #"dropout_range":[0,1]
-            }
-    }
-    mid_layers_config_opt = {
-        "n_layers":int(n_mid_layers[optimal_pars['n_mid_layers']]),
-        "mult":int(mults[optimal_pars['mult_mid']]),
-        "dropout_rate":float(optimal_pars['dropout_rate_mid'])
-        #"dropout_range":[0,1]
-        }
-
-    lstm_nnet_arq = build_lstm_nnet(trainset['X'],base_config_opt,mid_layers_config_opt,model_loss,optimizer)
-    _logger.debug("Build LSTM NNet with optimal parameters \n {}".format(lstm_nnet_arq.summary()))
-
-
-    #recien aqui entrenamos con todo el dataset y la arquitectura optima
     tic = time.time()
     lstm_nnet = fit_model(
-        lstm_nnet_arq,
+        lstm_nnet,
         trainset,
         dataset_splits['valset'],
         target_sensor,
@@ -218,7 +131,6 @@ def train_lstm(script_config):
     train_time = time.time() - tic
     _logger.debug("Trained LSTM NNet {} took {} seconds for {} datapoints".format(
         lstm_nnet,train_time,trainset['X'].shape[0]))
-
 
     tic = time.time()
     train_mae = eval_regression_performance(trainset,lstm_nnet,scaler,measure = mean_absolute_error)
@@ -241,8 +153,8 @@ def train_lstm(script_config):
     results = pd.DataFrame({
             'sensor':[target_sensor],
             'target_variable':[numeric_var],
-            'hyperopt_pars':[hyperopt_pars],
-            'optimal_pars':[optimal_pars],
+            'base_nnet_config':[base_config],
+            'mid_layers_config':[mid_layers_config],
             'model_loss':[model_loss],
             'optimizer':[optimizer],
             'early_stop_patience':[early_stop_patience],
@@ -261,7 +173,7 @@ def train_lstm(script_config):
 
 
     results.to_csv(
-        '{}{}_hyperopt_results_{}.csv'.format(
+        '{}{}_results_{}.csv'.format(
             output_results_path,
             str(script_config),
             time_stmp_str),
@@ -269,9 +181,9 @@ def train_lstm(script_config):
         )
 
     # Empaquetamos modelo, scaler y mae en un objeto para usar al predecir
-    model_package = {'model':lstm_nnet,'scaler':scaler,'test_mae':test_mae,'optimal_pars':optimal_pars}
+    model_package = {'model':lstm_nnet,'scaler':scaler,'test_mae':test_mae}
 
-    with open('{}{}_model_hyperopt_package_{}.model'.format(
+    with open('{}{}_model_package_{}.model'.format(
         output_models_path,
         str(script_config),
         time_stmp_str), 'wb') as file_pi:
@@ -291,7 +203,7 @@ def parse_args(args):
     parser.add_argument(
         "--version",
         action="version",
-        version="geolomas {ver}".format(ver=__version__))
+        version="satlomas {ver}".format(ver=__version__))
     parser.add_argument(
         dest="config_file",
         help="Input configuration json file",
@@ -333,7 +245,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    script_config = LSTMHyperoptTrainingScriptConfig(args.config_file)
+    script_config = LSTMTrainingScriptConfig(args.config_file)
     _logger.debug("Starting training an LSTM with {} configuration".format(args.config_file))
 
 

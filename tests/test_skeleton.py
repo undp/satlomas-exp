@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from geolomas.skeleton import fib
+from satlomas.skeleton import fib
 
 __author__ = "Damián Silvani"
 __copyright__ = "Damián Silvani"

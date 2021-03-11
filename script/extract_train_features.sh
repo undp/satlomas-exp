@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xeu -o pipefail
 
-dataset_dir=~/geolomas-exp/data/datasets/sen
-results_dir=~/geolomas-exp/data/results/sen
+dataset_dir=~/satlomas-exp/data/datasets/sen
+results_dir=~/satlomas-exp/data/results/sen
 
 function superimpose {
   input_dir=$1

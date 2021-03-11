@@ -5,7 +5,7 @@ console script. To run this script uncomment the following lines in the
 [options.entry_points] section in setup.cfg:
 
     console_scripts =
-         fibonacci = geolomas.skeleton:run
+         fibonacci = satlomas.skeleton:run
 
 Then run `python setup.py install` which will install the command `fibonacci`
 inside your current environment.
@@ -19,7 +19,7 @@ import argparse
 import sys
 import logging
 
-from geolomasexp import __version__
+from satlomas import __version__
 
 __author__ = "Damián Silvani"
 __copyright__ = "Damián Silvani"
@@ -58,7 +58,7 @@ def parse_args(args):
     parser.add_argument(
         "--version",
         action="version",
-        version="geolomas {ver}".format(ver=__version__))
+        version="satlomas {ver}".format(ver=__version__))
     parser.add_argument(
         dest="n",
         help="n-th Fibonacci number",

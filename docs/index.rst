@@ -1,8 +1,8 @@
 ========
-geolomas
+satlomas
 ========
 
-This is the documentation of **geolomas**.
+This is the documentation of **satlomas**.
 
 .. note::
 

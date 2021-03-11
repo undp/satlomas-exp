@@ -2,7 +2,7 @@
 """
 	Util functions to build, train and evaluate models
 """
-from geolomasexp import __version__
+from satlomas import __version__
 
 
 

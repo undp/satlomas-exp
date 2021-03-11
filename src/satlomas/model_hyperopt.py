@@ -2,7 +2,7 @@
 """
 	Util functions to build, train and evaluate models
 """
-from geolomasexp import __version__
+from satlomas import __version__
 
 from keras.layers import (
 	Dense,
@@ -16,7 +16,7 @@ from keras.models import (
 )
 from sklearn.metrics import mean_absolute_error
 
-from geolomasexp.model import fit_model
+from satlomas.model import fit_model
 
 import logging
 import numpy as np

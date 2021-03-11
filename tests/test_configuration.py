@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from geolomasexp.configuration import (
+from satlomas.configuration import (
 	LSTMTrainingScriptConfig,
 	TrainingScriptConfig
 	)

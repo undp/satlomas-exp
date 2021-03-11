@@ -8,7 +8,7 @@ set -xeu -o pipefail
 # 3. Clip mask to inclusion AOI shapefile
 #
 
-inclusion_vector=~/dym/geolomas-exp/data/lomas.geojson
+inclusion_vector=~/dym/satlomas-exp/data/lomas.geojson
 
 function extract_land_movement_mask {
   otbcli_BandMath -il $1 -out $2 -exp "im1b1 == 2"

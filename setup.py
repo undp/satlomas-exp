@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Setup file for geolomas.
+    Setup file for satlomas.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 4.0a1.
