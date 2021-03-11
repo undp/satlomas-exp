@@ -28,7 +28,7 @@ from keras.layers import (
 )
 from keras.models import Model
 from keras.optimizers import Adam
-from satlomas.unet.utils import resize
+from satlomasproc.unet.utils import resize
 from sklearn.preprocessing import minmax_scale
 
 __author__ = "Damián Silvani"

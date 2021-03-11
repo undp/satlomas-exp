@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from satlomas.data import *
+from satlomasproc.data import *
 
 __author__ = "Leandro Abraham"
 __copyright__ = "Dymaxion Labs"

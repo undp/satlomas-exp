@@ -2,13 +2,13 @@
 """
 	Util functions to build, train and evaluate models
 """
-from satlomas import __version__
+from satlomasproc import __version__
 
 from keras.layers import Dense, Dropout, LSTM
 from keras.models import load_model, model_from_json, Sequential
 from sklearn.metrics import mean_absolute_error
 
-from satlomas.model import fit_model
+from satlomasproc.model import fit_model
 
 import logging
 import numpy as np

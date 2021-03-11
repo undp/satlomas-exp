@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Util functions to build, train and evaluate models"""
-from satlomas import __version__
+from satlomasproc import __version__
 
 import logging
 import numpy as np

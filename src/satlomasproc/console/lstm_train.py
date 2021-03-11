@@ -15,11 +15,11 @@ import pickle
 import sys
 
 from datetime import datetime
-from satlomas import __version__
-from satlomas.lstm.configuration import LSTMTrainingScriptConfig
-from satlomas.lstm.data import read_time_series_from_csv
-from satlomas.lstm.feature import get_dataset_from_series, get_interest_variable
-from satlomas.lstm.model import (
+from satlomasproc import __version__
+from satlomasproc.lstm.configuration import LSTMTrainingScriptConfig
+from satlomasproc.lstm.data import read_time_series_from_csv
+from satlomasproc.lstm.feature import get_dataset_from_series, get_interest_variable
+from satlomasproc.lstm.model import (
     build_lstm_nnet,
     eval_regression_performance,
     fit_model,

@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 
 
-from satlomas import __version__
+from satlomasproc import __version__
 
 __author__ = "Leandro Abraham"
 __copyright__ = "Dymaxion Labs"

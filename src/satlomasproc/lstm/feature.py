@@ -6,7 +6,7 @@ import pickle
 import sys
 
 
-from satlomas import __version__
+from satlomasproc import __version__
 from sklearn.preprocessing import MinMaxScaler
 
 __author__ = "Leandro Abraham"

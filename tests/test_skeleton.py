@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from satlomas.skeleton import fib
+from satlomasproc.skeleton import fib
 
 __author__ = "Damián Silvani"
 __copyright__ = "Dymaxion Labs"

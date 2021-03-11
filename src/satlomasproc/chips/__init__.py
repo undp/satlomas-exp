@@ -7,7 +7,11 @@ from rasterio.crs import CRS
 from rasterio.features import rasterize
 from rasterio.warp import calculate_default_transform
 from rasterio.windows import bounds
-from satlomas.chips.utils import rescale_intensity, sliding_windows, write_chips_geojson
+from satlomasproc.chips.utils import (
+    rescale_intensity,
+    sliding_windows,
+    write_chips_geojson,
+)
 from shapely.geometry import box, shape
 from shapely.ops import transform, unary_union
 from shapely.validation import explain_validity

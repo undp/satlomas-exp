@@ -1,4 +1,4 @@
-from satlomas import __version__
+from satlomasproc import __version__
 
 from hyperopt import Trials, STATUS_OK, tpe
 from hyperas import optim

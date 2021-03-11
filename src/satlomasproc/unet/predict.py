@@ -5,8 +5,8 @@ from glob import glob
 import attr
 import numpy as np
 import rasterio
-from satlomas.unet.train import TrainConfig, build_model
-from satlomas.unet.utils import grouper, load_model, resize
+from satlomasproc.unet.train import TrainConfig, build_model
+from satlomasproc.unet.utils import grouper, load_model, resize
 from sklearn.preprocessing import minmax_scale
 from tqdm import tqdm
 
