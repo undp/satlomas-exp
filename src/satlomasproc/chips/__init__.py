@@ -137,10 +137,11 @@ def extract_chips(
     rescale_range=None,
     bands=None,
     type="tif",
-    write_geojson=False,
+    write_geojson=True,
     classes=None,
     crs=None,
     skip_existing=True,
+    dry_run=False,
     *,
     size,
     step_size,
@@ -178,6 +179,7 @@ def extract_chips(
             mask_type=mask_type,
             aoi_poly=aoi_poly,
             polys_dict=polys_dict,
+            dry_run=dry_run,
         )
 
 
@@ -187,7 +189,7 @@ def extract_chips_from_raster(
     rescale_range=None,
     bands=None,
     type="tif",
-    write_geojson=False,
+    write_geojson=True,
     labels=None,
     label_property="class",
     mask_type="class",
@@ -196,6 +198,7 @@ def extract_chips_from_raster(
     skip_existing=True,
     aoi_poly=None,
     polys_dict=None,
+    dry_run=False,
     *,
     size,
     step_size,
@@ -252,6 +255,14 @@ def extract_chips_from_raster(
 
             img_path = os.path.join(image_folder, f"{basename}_{i}_{j}.{type}")
             mask_path = os.path.join(masks_folder, f"{basename}_{i}_{j}.{type}")
+
+            # Store chip window for generating GeoJSON later
+            chip = (win_shape, (c, i, j))
+            chips.append(chip)
+
+            if dry_run:
+                continue
+
             if (
                 skip_existing
                 and os.path.exists(img_path)
@@ -259,13 +270,16 @@ def extract_chips_from_raster(
             ):
                 continue
 
+            # Extract chip image from original image
             img = ds.read(window=window)
             img = np.nan_to_num(img)
             img = np.array([img[b - 1, :, :] for b in bands])
 
+            # Rescale intensity (if needed)
             if rescale_mode:
                 img = rescale_intensity(img, rescale_mode, rescale_range)
 
+            # Write chip image
             if type == "tif":
                 image_was_saved = write_tif(
                     img,
@@ -278,23 +292,20 @@ def extract_chips_from_raster(
             else:
                 image_was_saved = write_image(img, img_path)
 
-            if image_was_saved:
-                chip = (win_shape, (c, i, j))
-                chips.append(chip)
-
-                if labels:
-                    if mask_type == "class":
-                        keys = classes if classes is not None else polys_dict.keys()
-                        multiband_chip_mask_by_classes(
-                            classes=keys,
-                            transform=ds.transform,
-                            window=window,
-                            window_shape=win_shape,
-                            polys_dict=polys_dict,
-                            metadata=meta,
-                            mask_path=mask_path,
-                            label_property=label_property,
-                        )
+            # If there are labels, and chip was extracted succesfully, generate a mask
+            if image_was_saved and labels:
+                if mask_type == "class":
+                    keys = classes if classes is not None else polys_dict.keys()
+                    multiband_chip_mask_by_classes(
+                        classes=keys,
+                        transform=ds.transform,
+                        window=window,
+                        window_shape=win_shape,
+                        polys_dict=polys_dict,
+                        metadata=meta,
+                        mask_path=mask_path,
+                        label_property=label_property,
+                    )
 
         if write_geojson:
             geojson_path = os.path.join(output_dir, "{}.geojson".format(basename))

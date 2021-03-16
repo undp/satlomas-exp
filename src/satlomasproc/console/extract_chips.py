@@ -134,13 +134,20 @@ def parse_args(args):
         help="write a GeoJSON file of chip polygons",
         dest="write_geojson",
         action="store_true",
-        default=False,
+        default=True,
     )
     parser.add_argument(
         "--no-write-geojson",
         help="do not write a GeoJSON file of chip polygons",
         dest="write_geojson",
         action="store_false",
+    )
+    parser.add_argument(
+        "--dry-run",
+        help="do not extract chips. It still writes GeoJSON if --write-geojson is used",
+        dest="dry_run",
+        action="store_true",
+        default=False,
     )
 
     parser.add_argument("--crs", help="force CRS of input files")
@@ -241,13 +248,14 @@ def main(args):
         bands=bands,
         type=args.type,
         within=args.within,
-        write_geojson=args.write_geojson,
+        write_geojson=write_geojson,
         classes=args.classes,
         crs=args.crs,
         skip_existing=args.skip_existing,
         size=args.size,
         step_size=args.step_size,
         output_dir=args.output_dir,
+        dry_run=args.dry_run
     )
 
 
