@@ -53,6 +53,8 @@ class TrainConfig:
     early_stopping_patience = attr.ib(default=3)
     batch_size = attr.ib(default=32)
     seed = attr.ib(default=None)
+    evaluate = attr.ib(default=True)
+    class_weights = attr.ib(default=0)
 
 
 def mean_iou(y_true, y_pred):
@@ -69,7 +71,8 @@ def mean_iou(y_true, y_pred):
 
 def build_model(cfg):
     # NOTE: for now, classes are equally balanced
-    class_weights = [0.5 for _ in range(cfg.n_classes)]
+    if cfg.class_weights == 0:
+        cfg.class_weights = [0.5 for _ in range(cfg.n_classes)]
 
     growth_factor = 2
     n_filters_start = 32
@@ -204,9 +207,24 @@ def build_model(cfg):
 
     def weighted_binary_crossentropy(y_true, y_pred):
         class_loglosses = K.mean(K.binary_crossentropy(y_true, y_pred), axis=[0, 1, 2])
-        return K.sum(class_loglosses * K.constant(class_weights))
+        return K.sum(class_loglosses * K.constant(cfg.class_weights))
 
-    model.compile(optimizer=Adam(), loss=weighted_binary_crossentropy)
+    def mean_iou(y_true, y_pred):
+        prec = []
+        for t in np.arange(0.5, 1.0, 0.05):
+            y_pred_ = tf.to_int32(y_pred > t)
+            score, up_opt = tf.metrics.mean_iou(y_true, y_pred_,2)
+            K.get_session().run(tf.local_variables_initializer())
+            with tf.control_dependencies([up_opt]):
+                score = tf.identity(score)
+            prec.append(score)
+        return K.mean(K.stack(prec), axis=0)
+
+    model.compile(
+        optimizer=Adam(),
+        loss=weighted_binary_crossentropy, 
+        metrics=["accuracy", mean_iou],
+    )
 
     return model
 
@@ -237,6 +255,7 @@ def preprocess_input(image, mask, *, config):
 
     # In case mask is binary (1 class),
     # make sure mask has shape (H, W, 1) and not (H, W).
+    image_ = image_.reshape(image_.shape[0], image_.shape[1], config.n_channels)
     mask_ = mask_.reshape(mask_.shape[0], mask_.shape[1], config.n_classes)
 
     return image_, mask_
@@ -276,6 +295,11 @@ def build_data_generator(image_files, *, config, mask_dir):
             )
 
             input, mask = preprocess_input(image=input, mask=mask, config=config)
+
+            if not np.any(np.isnan(input)):
+                if not np.any(np.isnan(mask)):
+                    batch_input.append(input)
+                    batch_output.append(mask)
 
             batch_input.append(input)
             batch_output.append(mask)
@@ -334,5 +358,16 @@ def train(cfg):
 
     # Save model
     model.save(cfg.model_path)
+
+    # Evaluate model on validation set
+    if cfg.evaluate:
+        scores = model.evaluate_generator(
+            val_generator, steps=len(val_images) // cfg.batch_size
+        )
+        loss, accuracy, mean_iou = scores
+        print("*** Final validation metrics ***")
+        print("Loss:", loss)
+        print("Accuracy:", accuracy)
+        print("Mean IoU:", mean_iou)
 
     return results

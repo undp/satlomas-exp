@@ -28,6 +28,7 @@ class PredictConfig:
     width = attr.ib(default=320)
     n_channels = attr.ib(default=3)
     n_classes = attr.ib(default=1)
+    class_weights = attr.ib(default=0)
 
 
 def predict(cfg):
@@ -54,8 +55,11 @@ def predict(cfg):
             with rasterio.open(img_path) as src:
                 img_ = np.dstack([src.read(b) for b in range(1, cfg.n_channels + 1)])
                 profile_ = src.profile.copy()
-
+                img_ = minmax_scale(img_.ravel(), feature_range=(0, 255)).reshape(
+                    img_.shape
+                )
                 img_ = resize(img_, (cfg.height, cfg.width))
+                img_ = img_.reshape(cfg.height, cfg.width, cfg.n_channels)
                 X_predict.append(img_)
                 X_profile.append(profile_)
 
