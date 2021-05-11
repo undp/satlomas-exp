@@ -301,9 +301,6 @@ def build_data_generator(image_files, *, config, mask_dir):
                     batch_input.append(input)
                     batch_output.append(mask)
 
-            batch_input.append(input)
-            batch_output.append(mask)
-
         # Return a tuple of (input, output) to feed the network
         batch_x = np.array(batch_input)
         batch_y = np.array(batch_output)
