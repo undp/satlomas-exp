@@ -248,7 +248,7 @@ def main(args):
         bands=bands,
         type=args.type,
         within=args.within,
-        write_geojson=write_geojson,
+        write_geojson=args.write_geojson,
         classes=args.classes,
         crs=args.crs,
         skip_existing=args.skip_existing,

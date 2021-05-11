@@ -92,9 +92,13 @@ def classify_polygons(labels, label_property, classes):
     with fiona.open(labels) as blocks:
         polys_dict = {}
         for block in blocks:
-            if label_property in block["properties"]:
-                c = block["properties"][label_property]
-                geom = shape(block["geometry"])
+            if label_property in block['properties']:
+                c = str(block['properties'][label_property])
+                try:
+                    geom = shape(block['geometry'])
+                except:
+                    _logger.warning("Failed to get geometry shape for feature: %s", block)
+                    continue
                 if c in polys_dict:
                     polys_dict[c].append(geom)
                 else:
@@ -141,6 +145,7 @@ def extract_chips(
     classes=None,
     crs=None,
     skip_existing=True,
+    within=False,
     dry_run=False,
     *,
     size,
@@ -171,6 +176,7 @@ def extract_chips(
             bands=bands,
             output_dir=output_dir,
             type=type,
+            within=within,
             write_geojson=write_geojson,
             crs=crs,
             labels=labels,
@@ -196,6 +202,7 @@ def extract_chips_from_raster(
     classes=None,
     crs=None,
     skip_existing=True,
+    within=False,
     aoi_poly=None,
     polys_dict=None,
     dry_run=False,
@@ -238,10 +245,14 @@ def extract_chips_from_raster(
         # Filter windows by AOI shape
         if aoi_poly:
             _logger.info("Filtering windows by AOI")
-            window_and_shapes = [
-                (w, s) for w, s in window_and_shapes if s.intersects(aoi_poly)
-            ]
-            _logger.info("Total windows after filtering: %d", len(window_and_shapes))
+            _logger.info("Using \"%s\" function",
+                         'within' if within else 'intersects')
+            filter_fn = lambda w, aoi: w.within(
+                aoi) if within else w.intersects(aoi)
+            window_and_shapes = [(w, s) for w, s in window_and_shapes
+                                 if filter_fn(s, aoi_poly)]
+            _logger.info("Total windows after filtering: %d",
+                         len(window_and_shapes))
 
         meta = ds.meta.copy()
         if crs:
