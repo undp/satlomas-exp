@@ -23,9 +23,9 @@ def plot_data_generator(num_samples=3, fig_size=(20, 10), *, train_config):
                 _, ax = plt.subplots(nrows=1,
                                      ncols=train_config.n_classes + 1,
                                      figsize=fig_size)
-                ax[0].imshow(image)
+                ax[0].imshow(image[:,:,:train_config.n_channels])
                 for i in range(train_config.n_classes):
-                    ax[i+1].imshow(mask[:, :, i])
+                    ax[i + 1].imshow(mask[:, :, i])
                 j += 1
                 if j >= num:
                     return
