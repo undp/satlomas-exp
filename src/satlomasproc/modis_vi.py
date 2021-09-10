@@ -1,5 +1,6 @@
 import logging
 import os
+import datetime
 import time
 
 import requests
@@ -26,28 +27,64 @@ H_PERU = "10"
 V_PERU = "10"
 
 
-def download_modis_vi_images(output_dir=".", *, date_from, date_to, username, password):
-    year = date_to.year
-    doy_begin = date_from.timetuple().tm_yday
-    doy_end = date_to.timetuple().tm_yday
+def as_date(datetime_or_date):
+    if isinstance(datetime_or_date, datetime.date):
+        return datetime_or_date
+    elif isinstance(datetime_or_date, datetime.datetime):
+        return datetime_or_date.date()
+    else:
+        raise ValueError(f"invalid date or datetime: {datetime_or_date}")
 
-    logger.info("Download MODIS hdf files")
-    tile = "h{}v{}".format(H_PERU, V_PERU)
-    return get_modisfiles(
-        username,
-        password,
-        MODIS_PLATFORM,
-        MODIS_PRODUCT,
-        year,
-        tile,
-        proxy=None,
-        doy_start=doy_begin,
-        doy_end=doy_end,
-        out_dir=output_dir,
-        verbose=True,
-        ruff=False,
-        get_xml=False,
-    )
+
+def split_date_interval(date_from, date_to):
+    """Split date interval into yearly sub-intervals"""
+    date_from = as_date(date_from)
+    date_to = as_date(date_to)
+    years = range(date_from.year, date_to.year + 1)
+    dates = []
+    for i, year in enumerate(years):
+        if i == 0:
+            dt_to = datetime.date(year, 12, 31)
+            if dt_to != date_from:
+                dates.append((date_from, dt_to))
+        elif i == len(years) - 1:
+            dt_from = datetime.date(year, 1, 1)
+            if dt_from != date_to:
+                dates.append((dt_from, date_to))
+        else:
+            dates.append((datetime.date(year, 1, 1), datetime.date(year, 12, 31)))
+    return dates
+
+
+def download_modis_vi_images(output_dir=".", *, date_from, date_to, username, password):
+    date_intervals = split_date_interval(date_from, date_to)
+    all_files = []
+    for dt_from, dt_to in date_intervals:
+        year = dt_to.year
+        doy_begin = dt_from.timetuple().tm_yday
+        doy_end = dt_to.timetuple().tm_yday
+
+        logger.info("Download MODIS hdf files")
+        tile = "h{}v{}".format(H_PERU, V_PERU)
+
+        files = get_modisfiles(
+            username,
+            password,
+            MODIS_PLATFORM,
+            MODIS_PRODUCT,
+            year,
+            tile,
+            proxy=None,
+            doy_start=doy_begin,
+            doy_end=doy_end,
+            out_dir=output_dir,
+            verbose=True,
+            ruff=False,
+            get_xml=False,
+        )
+        all_files.extend(files)
+
+    return all_files
 
 
 def get_modisfiles(
