@@ -318,3 +318,12 @@ def extract_subdatasets_as_gtiffs(files, tif_dir):
                 f'HDF4_EOS:EOS_GRID:{src}:MODIS_Grid_16DAY_250m_500m_VI:"250m 16 days pixel reliability" '
                 f"{dst}_pixelrel.tif"
             )
+
+
+def extract_date_from_modis_filename(filename):
+    """Extract date from MODIS filename, which contains year and doy encoded in it"""
+    name, _ = os.path.splitext(os.path.basename(filename))
+    date_part = name.split(".")[1]
+    year = int(date_part[1:5])
+    doy = int(date_part[5:])
+    return datetime.date(year, 1, 1) + datetime.timedelta(doy - 1)
