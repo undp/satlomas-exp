@@ -39,21 +39,40 @@ def sliding_windows(size, step_size, width, height, whole=False):
 
 
 def rescale_intensity(image, rescale_mode, rescale_range):
-    """Calculate percentiles from a range cut and rescale intensity of image"""
+    """
+    Calculate percentiles from a range cut and
+    rescale intensity of image to byte range
 
+    Parameters
+    ----------
+    image : numpy.ndarray
+        image array
+    rescale_mode : str
+        rescaling mode, either 'percentiles' or 'values'
+    rescale_range : Tuple[number, number]
+        input range for rescaling
+
+    Returns
+    -------
+    numpy.ndarray
+        rescaled image
+    """
     if rescale_mode == "percentiles":
-        in_range = tuple(np.percentile(image, rescale_range))
+        in_range = np.percentile(image, rescale_range, axis=(1, 2)).T
     elif rescale_mode == "values":
-        min_value, max_value = rescale_range
-        if not min_value:
-            min_value = np.min(image)
-        if not max_value:
-            max_value = np.max(image)
-        in_range = (min_value, max_value)
+        in_range = np.array(rescale_range).reshape(-1, 2)
+        if in_range.shape[0] == 1:
+            in_range = [tuple(in_range[0]) for _ in range(image.shape[0])]
+    else:
+        raise RuntimeError(f"unknown rescale_mode {rescale_mode}")
 
-    return exposure.rescale_intensity(
-        image, in_range=in_range, out_range=(0, 255)
-    ).astype(np.uint8)
+    return np.array([
+            exposure.rescale_intensity(
+                image[i, :, :], in_range=tuple(in_range[i]), out_range=(1, 255)
+            ).astype(np.uint8)
+            for i in range(image.shape[0])
+        ])
+
 
 
 def calculate_raster_percentiles(raster, lower_cut=2, upper_cut=98):
