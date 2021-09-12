@@ -84,7 +84,7 @@ def download_modis_vi_images(output_dir=".", *, date_from, date_to, username, pa
         )
         all_files.extend(files)
 
-    return all_files
+    return sorted(all_files)
 
 
 def get_modisfiles(
