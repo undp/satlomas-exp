@@ -240,6 +240,18 @@ def coalesce_and_binarize_all(threshold=0.75, *, input_dir, output_dir):
         coalesce_and_binarize(image, threshold=threshold, output_dir=output_dir)
 
 
+def remove_negative_class(*, input_dir, output_dir, num_class):
+    images = glob(os.path.join(input_dir, "*.tif"))
+    os.makedirs(output_dir, exist_ok=True)
+    for src_path in tqdm(images):
+        dst_path = os.path.join(output_dir, os.path.basename(src_path))
+        with rasterio.open(src_path) as src:
+            with rasterio.open(dst_path, "w", **src.profile) as dst:
+                img = src.read()
+                img[img == num_class] = src.nodata
+                dst.write(img)
+
+
 def gdal_merge(output, files):
     gdal_merge_bin = f"{settings.GDAL_BIN_PATH}/gdal_merge.py"
     cmd = (
