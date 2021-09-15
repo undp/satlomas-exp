@@ -74,26 +74,23 @@ def rescale_intensity(image, rescale_mode, rescale_range):
         ])
 
 
-
-def calculate_raster_percentiles(raster, lower_cut=2, upper_cut=98):
-    sample_size = 5000
-    size = (2048, 2048)
+def calculate_raster_percentiles(raster, lower_cut=2, upper_cut=98, sample_size=128, size=2048):
+    size = (size, size)
 
     with rasterio.open(raster) as ds:
         windows = list(sliding_windows(size, size, ds.width, ds.height))
-        window_sample_size = math.ceil(sample_size / len(windows))
-        _logger.info(
-            "Windows: %d, windows sample size: %d", len(windows), window_sample_size
-        )
+        _logger.info("Windows: %d, sample size: %d", len(windows), sample_size)
         totals_per_bands = [[] for _ in range(ds.count)]
         for window, _ in tqdm(windows):
-            img = ds.read(window=window)
-            img = np.nan_to_num(img)
+            img = ds.read(window=window).astype(np.float)
+            img[img == ds.nodata] = np.nan
+            if np.isnan(img).all():
+                continue
             window_sample = []
             for i in range(img.shape[0]):
                 values = img[i].flatten()
                 window_sample.append(
-                    np.random.choice(values, size=window_sample_size, replace=False)
+                    np.random.choice(values, size=sample_size, replace=False)
                 )
             for i, win in enumerate(window_sample):
                 totals_per_bands[i].append(win)
@@ -105,7 +102,7 @@ def calculate_raster_percentiles(raster, lower_cut=2, upper_cut=98):
         _logger.info("Total shape: %s", totals.shape)
 
         res = tuple(
-            tuple(p) for p in np.percentile(totals, (lower_cut, upper_cut), axis=1).T
+            tuple(p) for p in np.nanpercentile(totals, (lower_cut, upper_cut), axis=1).T
         )
         _logger.info("Percentiles: %s", res)
 
