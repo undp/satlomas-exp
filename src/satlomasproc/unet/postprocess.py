@@ -269,6 +269,16 @@ def gdal_merge(output, files):
     run_command(cmd)
 
 
+def gdalwarp_merge(output, files, quiet=False):
+    gdalwarp_bin = f"{settings.GDAL_BIN_PATH}/gdalwarp"
+    cmd = (
+        f"{gdalwarp_bin} -srcnodata 0 -dstnodata 0 "
+        f"-overwrite -multi -wo NUM_THREADS=ALL_CPUS "
+        f"{' '.join(files)} {output}"
+    )
+    run_command(cmd, quiet=quiet)
+
+
 def merge_all(batch_size=500, temp_dir=None, *, input_dir, output):
     files = sorted(list(glob(os.path.join(input_dir, "*.tif"))))
     if not files:
@@ -281,18 +291,19 @@ def merge_all(batch_size=500, temp_dir=None, *, input_dir, output):
 
     os.makedirs(temp_dir, exist_ok=True)
 
+    merged_files = []
     total = math.ceil(len(files) / batch_size)
-    dst = os.path.join(temp_dir, f"merged.tif")
     for i, group in tqdm(enumerate(grouper(files, batch_size)), total=total):
+        dst = os.path.join(temp_dir, f"{i}.tif")
         group = [f for f in group if f]
-        if i > 0:
-            tmpdst = os.path.join(temp_dir, f"prev_merged.tif")
-            shutil.copy_file(dst, tmpdst)
-            group.insert(0, tmpdst)
-        gdal_merge(dst, group)
+        gdal_merge(dst, group, quiet=True)
+        merged_files.append(dst)
 
     os.makedirs(os.path.dirname(output), exist_ok=True)
-    shutil.copy_file(dst, output)
+    if os.path.exists(output):
+        os.unlink(output)
+
+    gdalwarp_merge(output, merged_files)
 
     if tmpdir:
         tmpdir.cleanup()

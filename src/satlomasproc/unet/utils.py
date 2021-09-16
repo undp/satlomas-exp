@@ -10,8 +10,10 @@ __copyright__ = "Dymaxion Labs"
 __license__ = "apache-2.0"
 
 
-def run_command(cmd):
-    subprocess.run(cmd, shell=True, check=True)
+def run_command(cmd, quiet=False):
+    stderr = subprocess.DEVNULL if quiet else None
+    stdout = subprocess.DEVNULL if quiet else None
+    subprocess.run(cmd, shell=True, check=True, stdout=stdout, stderr=stderr)
 
 
 def grouper(iterable, n, fillvalue=None):
