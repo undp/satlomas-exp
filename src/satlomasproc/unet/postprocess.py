@@ -235,9 +235,9 @@ def coalesce_and_binarize(src_path, threshold=0.5, *, output_dir):
 def coalesce_and_binarize_all(threshold=0.75, *, input_dir, output_dir):
     images = glob(os.path.join(input_dir, "*.tif"))
     os.makedirs(output_dir, exist_ok=True)
-    # TODO: Use multiprocessing
-    for image in tqdm(images):
-        coalesce_and_binarize(image, threshold=threshold, output_dir=output_dir)
+    with mp.Pool(mp.cpu_count()) as pool:
+        worker = partial(coalesce_and_binarize, threshold=threshold, output_dir=output_dir)
+        pool.map(worker, images)
 
 
 def remove_negative_class(*, input_dir, output_dir, num_class):
