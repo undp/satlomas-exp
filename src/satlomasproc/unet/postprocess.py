@@ -3,6 +3,8 @@ import math
 import os
 import sys
 import tempfile
+import multiprocessing as mp
+from functools import partial
 from glob import glob
 
 import numpy as np
