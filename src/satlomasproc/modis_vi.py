@@ -41,6 +41,8 @@ def split_date_interval(date_from, date_to):
     date_from = as_date(date_from)
     date_to = as_date(date_to)
     years = range(date_from.year, date_to.year + 1)
+    if len(years) == 1:
+        return [(date_from, date_to)]
     dates = []
     for i, year in enumerate(years):
         if i == 0:
