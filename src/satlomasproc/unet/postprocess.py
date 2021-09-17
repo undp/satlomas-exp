@@ -259,14 +259,14 @@ def remove_negative_class_all(*, input_dir, output_dir, num_class):
         pool.map(worker, images)
 
 
-def gdal_merge(output, files):
+def gdal_merge(output, files, quiet=False):
     gdal_merge_bin = f"{settings.GDAL_BIN_PATH}/gdal_merge.py"
     cmd = (
         f"{gdal_merge_bin} -n 0 -a_nodata 0 "
         f"-co TILED=YES "
         f"-o {output} {' '.join(files)}"
     )
-    run_command(cmd)
+    run_command(cmd, quiet=quiet)
 
 
 def gdalwarp_merge(output, files, quiet=False):
